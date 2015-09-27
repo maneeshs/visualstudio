@@ -43,7 +43,7 @@ action :install do
       windows_package new_resource.package_name do
         source setup_exe
         installer_type :custom
-        options "/Q /norestart /noweb /log \"#{install_log_file}\""
+        options "/Q /norestart /noweb /Log \"#{install_log_file}\""
         timeout 3600 # 1 hour
       end
 
