@@ -67,7 +67,7 @@ def extracted_iso_dir
 end
 
 def install_log_file
-  win_friendly_path(::File.join(new_resource.install_dir, 'vsinstall_update.log'))
+  win_friendly_path(::File.join(new_resource.install_dir, 'vsinstallupdate.log'))
 end
 
 # only base file name of source, e.g. VS2013.5
