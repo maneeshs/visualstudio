@@ -45,6 +45,7 @@ action :install do
       Chef::Log.debug(cmd)
       shell = Chef::ShellOut.new(cmd)
       shell.run_command
+      shell.timeout = 1800
       shell.error!
 
       # Cleanup extracted ISO files
