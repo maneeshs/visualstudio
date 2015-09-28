@@ -44,8 +44,8 @@ action :install do
       cmd = "#{setup_exe} /Q /norestart /noweb /Log \"#{install_log_file}\""
       Chef::Log.debug(cmd)
       shell = Chef::ShellOut.new(cmd)
-      shell.run_command
       shell.timeout = 1800
+      shell.run_command
       shell.error!
 
       # Cleanup extracted ISO files
