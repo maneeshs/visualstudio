@@ -33,20 +33,20 @@ action :install do
     converge_by("Installing #{new_resource.package_name}") do
 
       # Extract the ISO image to the temporary Chef cache dir
-      archive = Chef::Resource::SevenZipArchive.new("extract_#{setup_basename}_iso", run_context)
-      archive.source(new_resource.source)
-      archive.path(extracted_iso_dir)
-      archive.overwrite(true)
-      archive.checksum(new_resource.checksum)
-      archive.run_action(:extract)
+      seven_zip_archive "extract_#{setup_basename}_iso" do
+        path extracted_iso_dir
+        source new_resource.source
+        overwrite true
+        checksum new_resource.checksum
+      end
 
       # Install Visual Studio Update
-      cmd = "#{setup_exe} /Q /norestart /noweb /Log \"#{install_log_file}\""
-      Chef::Log.debug(cmd)
-      shell = Chef::ShellOut.new(cmd)
-      shell.timeout = 1800
-      shell.run_command
-      shell.error!
+      windows_package new_resource.package_name do
+        source setup_exe
+        installer_type :custom
+        options "/Q /norestart /noweb /Log \"#{install_log_file}\""
+        timeout 3600 # 1 hour
+      end
 
       # Cleanup extracted ISO files
       directory "remove_#{new_resource.package_name}" do
@@ -79,7 +79,6 @@ end
 # setup executable path, by convention the exe has the same name as the iso
 # except VS 2010 which just uses setup.exe
 def setup_exe
-  file = ::File.join(extracted_iso_dir, "#{setup_basename}.exe")
-  return file if ::File.exist?(file)
-  ::File.join(extracted_iso_dir, 'setup.exe')
+  setup_file = new_resource.package_name.include?('2010') ? 'setup.exe' : "#{setup_basename}.exe"
+  ::File.join(extracted_iso_dir, setup_file)
 end
