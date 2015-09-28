@@ -19,6 +19,7 @@
 #
 
 require 'digest/md5'
+require 'chef/shell_out'
 
 include Windows::Helper
 include Visualstudio::Helper
@@ -32,20 +33,19 @@ action :install do
     converge_by("Installing #{new_resource.package_name}") do
 
       # Extract the ISO image to the temporary Chef cache dir
-      seven_zip_archive "extract_#{setup_basename}_iso" do
-        path extracted_iso_dir
-        source new_resource.source
-        overwrite true
-        checksum new_resource.checksum
-      end
+      archive = Chef::Resource::SevenZipArchive.new("extract_#{setup_basename}_iso", run_context)
+      archive.source(new_resource.source)
+      archive.path(extracted_iso_dir)
+      archive.overwrite(true)
+      archive.checksum(new_resource.checksum)
+      archive.run_action(:extract)
 
       # Install Visual Studio Update
-      windows_package new_resource.package_name do
-        source setup_exe
-        installer_type :custom
-        options "/Q /norestart /noweb /Log \"#{install_log_file}\""
-        timeout 3600 # 1 hour
-      end
+      cmd = "#{setup_exe} /Q /norestart /noweb /Log \"#{install_log_file}\""
+      Chef::Log.debug(cmd)
+      shell = Chef::ShellOut.new(cmd)
+      shell.run_command
+      shell.error!
 
       # Cleanup extracted ISO files
       directory "remove_#{new_resource.package_name}" do
