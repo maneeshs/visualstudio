@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
     chef.file_cache_path = 'c:/var/chef/cache' # Need leading drive letter
     chef.json = {
       'visualstudio' => {
-        'version' => '2015',
+        'version' => '2012',
         'edition' => 'professional',
         'source' => 'http://vagrantboxes.hq.daptiv.com/installs/cookbookresources',
         'preserve_extracted_files' => true
